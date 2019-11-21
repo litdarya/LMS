@@ -6,6 +6,9 @@ from lms.web.handlers import (
 )
 
 ping_url = (r'/ping/', PingHandler)
+urls = [
+        # (r'/list_groups/', GroupHandler)
+    ]
 
 
 def get_all_urls() -> List[Tuple[str, RequestHandler]]:

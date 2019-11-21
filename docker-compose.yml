@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:latest
+    volumes:
+      - "postgres_data:/var/lib/postgres"
+    networks:
+      - postgres-net
+    environment:
+      - POSTGRES_DB=lms_db
+      - POSTGRES_USER=admin
+    restart: always
+
+volumes:
+  postgres_data:
+
+networks:
+  postgres-net:

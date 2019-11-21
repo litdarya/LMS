@@ -8,7 +8,18 @@ class PingHandler(RequestHandler):
     }
 
     def get(self):
-        print('here')
+        self.write(self._response)
+        self.set_status(200)
+        self.finish()
+
+
+class GroupHandler(RequestHandler):
+    _response = {
+        ''
+        'status': 'ok'
+    }
+
+    def get(self):
         self.write(self._response)
         self.set_status(200)
         self.finish()

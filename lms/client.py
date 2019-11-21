@@ -3,14 +3,18 @@ from tornado import ioloop
 from tornado.web import Application
 
 from lms.web.urls import get_all_urls
+from tornado_sqlalchemy import make_session_factory
+
+# DB_ADDR = 'postgres://user:password@host/database'
 
 
 class LmsApplication(Application):
     def __init__(self, handlers, **kwargs):
         super(LmsApplication, self).__init__(handlers=handlers, **kwargs)
+        self.db_session = None
 
     def prepare(self):
-        pass
+        self.db_session = make_session_factory(DB_ADDR)
 
 
 @click.command()
