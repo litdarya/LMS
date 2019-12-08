@@ -10,6 +10,7 @@ setup(
     description='',
     install_requires=[
         'click==7.0',
+        'asyncpg>=0.18.0',
         'tornado==5.0.2',
         'requests==2.21.0',
     ]
