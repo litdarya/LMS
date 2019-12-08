@@ -20,11 +20,21 @@ async def get_pool() -> apg_pool.Pool:
     return _pool
 
 
-async def execute(
+async def fetch(
         *,
         query: str,
-        params: Optional[Tuple[Any, ...]] = None
+        params: Optional[Tuple[Any, ...]] = tuple()
 ) -> List[asyncpg.Record]:
     pool = await get_pool()
     async with pool.acquire() as connection:
         return await connection.fetch(query, *params)
+
+
+async def fetch_val(
+        *,
+        query: str,
+        params: Optional[Tuple[Any, ...]] = tuple()
+) -> asyncpg.Record:
+    pool = await get_pool()
+    async with pool.acquire() as connection:
+        return await connection.fetchval(query, *params)
