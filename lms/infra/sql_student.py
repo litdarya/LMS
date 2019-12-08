@@ -1,28 +1,34 @@
 from typing import Iterable
 
-from lms.domain.user import User
+from lms.domain.student import Student
+from lms.infra.sql_user import SqlUser
 import lms.infra.db.postgres_executor as pe
 
 
-class SqlUser(User):
+class SqlStudent(SqlUser, Student):
     def __init__(self, *, user_id):
         super().__init__(user_id=user_id)
 
     async def get_info(
             self,
             *,
-            params: Iterable[str] = User.DEFAULT_PARAMS
+            params: Iterable[str] = Student.DEFAULT_PARAMS
     ):
-        field_list = ", ".join(params)
-        query = f""""SELECT {field_list} FROM users WHERE user_id=$1"""
-        records = await pe.execute(
+        fields = ", ".join(Student.DEFAULT_PARAMS)
+        query = f"""
+        SELECT {fields}
+        FROM users
+            JOIN student 
+            ON users.user_id = student.user_id AND users.user_id = $1 AND student.user_id = $1
+        """
+        records = await pe.fetch(
             query=query,
             params=(self.user_id,)
         )
-        user = None
         for record in records:
-            assert user is not None
-            user = {}
-            for field in field_list:
-                user[field] = record.get(field, None)
-        return user
+            student = {}
+            print(dict(record))
+            for param in params:
+                student[param] = record.get(param, None)
+            return student
+        return None
