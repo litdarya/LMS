@@ -1,7 +1,6 @@
 from tornado.web import RequestHandler
 from typing import List, Tuple, Type
-from lms.infra.sql_user import SqlUser
-from lms.infra.sql_student import SqlStudent
+from lms.infra.sql_user_factory import SqlUserFactory
 
 from lms.web.handlers import (
     PingHandler,
@@ -13,8 +12,8 @@ from lms.web.handlers import (
 ping_url = (r'/ping', PingHandler)
 urls = [
     (r'/list_groups/', GroupHandler),
-    (r'/user_info/', UserInfoHandler, dict(user=SqlUser, student=SqlStudent)),
-    (r'/edit_user_info/', EditUserInfoHandler, dict(user=SqlUser))
+    (r'/user_info/', UserInfoHandler, dict(user_factory=SqlUserFactory)),
+    (r'/edit_user_info/', EditUserInfoHandler, dict(user_factory=SqlUserFactory))
 ]
 
 

@@ -1,4 +1,5 @@
 import json
+from abc import abstractmethod
 
 from tornado.web import RequestHandler
 
@@ -16,12 +17,11 @@ class PingHandler(RequestHandler):
         self.finish()
 
 
-class UserInfoHandler(RequestHandler):
-    def initialize(self, user, student):
-        body = json.loads(self.request.body)
-        self.user_id = body.get('user_id')
-        self.user = user(user_id=self.user_id)
-        self.student = student(user_id=self.user_id)
+class UserHandler(RequestHandler):
+    def initialize(self, user_factory):
+        self.body = json.loads(self.request.body)
+        self.user_id = self.body.get('user_id')
+        self.user_factory = user_factory
 
     def _bad_request(self, *, msg):
         self.set_status(400)
@@ -34,54 +34,54 @@ class UserInfoHandler(RequestHandler):
     async def prepare(self):
         if self.user_id is None:
             self._bad_request(msg='expected user_id in post body')
+        self.user = await self.user_factory.get_student_or_professor(
+            user_id=self.user_id
+        )
+
+    @abstractmethod
+    async def post(self):
+        pass
+
+
+class UserInfoHandler(UserHandler):
+    def initialize(self, user_factory):
+        super().initialize(user_factory)
 
     async def post(self):
-        if await self.user.is_professor:
-            self.info = await self.user.get_info()
-            self.info['role'] = 'professor'
-        else:
-            self.info = await self.student.get_info()
-            self.info['role'] = 'student'
+        self.info = await self.user.get_info()
         self.write({
             'status': 'ok',
             'info': self.info,
         })
 
 
-class EditUserInfoHandler(RequestHandler):
-    def initialize(self, user):
-        body = json.loads(self.request.body)
-        self.user_id = body.get('user_id')
-        self.update = body.get('update')
-        self.user = user(user_id=self.user_id)
+class EditUserInfoHandler(UserHandler):
+    def initialize(self, user_factory):
+        super().initialize(user_factory)
+        self.update = self.body.get('update')
 
-    def _bad_request(self, *, msg):
-        self.set_status(400)
-        self.write({
-            'status': 'err',
-            'msg': msg
-        })
-        self.finish()
-
-    def prepare(self):
-        if self.user_id is None:
-            self._bad_request(msg='expected user_id in post body')
+    async def prepare(self):
+        await super().prepare()
+        if not self.update:
+            self._bad_request(msg='expected "update" parameter')
         for param in self.update:
-            if param not in self.user.DEFAULT_PARAMS:
-                self._bad_request(msg=f'unexpected field {param} for user')
+            if param not in self.user.EDITABLE_PARAMS:
+                self._bad_request(
+                    msg=f'unexpected field {param} does not exist or cannot be updated'
+                )
 
     async def post(self):
         updated = await self.user.update_info(update=self.update)
         if updated:
             self.write({
                 'status': 'ok',
-                'updated': updated
+                'updated': updated,
             })
         else:
             self.write({
-                'status': '¯\\_(ツ)_/¯',
+                'status': 'error',
+                'updated': 'false',
             })
-
 
 
 class GroupHandler(RequestHandler):

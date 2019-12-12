@@ -14,21 +14,25 @@ class SqlStudent(SqlUser, Student):
             *,
             params: Iterable[str] = Student.DEFAULT_PARAMS
     ):
-        fields = ", ".join(Student.DEFAULT_PARAMS)
-        query = f"""
-        SELECT {fields}
-        FROM users
-            JOIN student 
-            ON users.user_id = student.user_id AND users.user_id = $1 AND student.user_id = $1
+        extra_fields = set(params) & set(Student.EXTRA_STUDENT_PARAMS)
+        user_fields = list(set(params) & set(SqlUser.DEFAULT_PARAMS))
+        query = """
+            SELECT *
+            FROM student
+            WHERE student.user_id = $1
         """
-        records = await pe.fetch(
+        record_future = pe.fetch_row(
             query=query,
             params=(self.user_id,)
         )
-        for record in records:
-            student = {}
-            print(dict(record))
-            for param in params:
-                student[param] = record.get(param, None)
-            return student
-        return None
+        student_info_future = SqlUser.get_info(self, params=user_fields)
+        record = await record_future
+        if record is None:
+            return None
+        student_info = await student_info_future
+
+        assert student_info is not None, 'have row in students table but not in users'
+        for field in extra_fields:
+            student_info[field] = record.get(field, None)
+        student_info['role'] = 'student'
+        return student_info
