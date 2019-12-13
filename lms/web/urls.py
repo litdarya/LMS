@@ -6,6 +6,7 @@ from lms.web.handlers import (
     PingHandler,
     GroupHandler,
     UserInfoHandler,
+    UserCoursesHandler,
     EditUserInfoHandler,
 )
 
@@ -13,6 +14,7 @@ ping_url = (r'/ping', PingHandler)
 urls = [
     (r'/list_groups/', GroupHandler),
     (r'/user_info/', UserInfoHandler, dict(user_factory=SqlUserFactory)),
+    (r'/user_courses/', UserCoursesHandler, dict(user_factory=SqlUserFactory)),
     (r'/edit_user_info/', EditUserInfoHandler, dict(user_factory=SqlUserFactory))
 ]
 

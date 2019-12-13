@@ -55,6 +55,18 @@ class UserInfoHandler(UserHandler):
         })
 
 
+class UserCoursesHandler(UserHandler):
+    def initialize(self, user_factory):
+        super().initialize(user_factory)
+
+    async def post(self):
+        self.courses = await self.user.courses_list()
+        self.write({
+            'status': 'ok',
+            'courses': self.courses,
+        })
+
+
 class EditUserInfoHandler(UserHandler):
     def initialize(self, user_factory):
         super().initialize(user_factory)

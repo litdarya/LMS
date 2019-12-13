@@ -9,7 +9,7 @@ from lms.infra.sql_user import SqlUser
 class SqlUserFactory(UserFactory):
     @staticmethod
     async def get_student_or_professor(user_id) -> Union[SqlStudent, SqlProfessor]:
-        user = SqlUser(user_id=user_id)
-        if await user.is_professor:
+        professor = await SqlUser.check_is_professor(user_id=user_id)
+        if professor:
             return SqlProfessor(user_id=user_id)
         return SqlStudent(user_id=user_id)

@@ -1,6 +1,7 @@
-from typing import Iterable
+from typing import Iterable, Optional, List, Dict
 
 from lms.domain.student import Student
+from lms.infra.sql_course import SqlCourse
 from lms.infra.sql_user import SqlUser
 import lms.infra.db.postgres_executor as pe
 
@@ -36,3 +37,25 @@ class SqlStudent(SqlUser, Student):
             student_info[field] = record.get(field, None)
         student_info['role'] = 'student'
         return student_info
+
+    async def courses_list(self) -> List[Dict[str, str]]:
+        print('student')
+        info = await self.get_info(params=('group_name',))
+        group_name = info.get('group_name')
+        if group_name is None:
+            print('no group name')
+            return []
+        print(group_name)
+        query_courses = '''SELECT course_id
+            FROM group_to_course 
+            WHERE group_name = $1'''
+        records = await pe.fetch(
+            query=query_courses,
+            params=(group_name,)
+        )
+        if records is None:
+            return []
+        courses = await SqlCourse.resolve_courses(
+            course_ids=[record.get('course_id', None) for record in records]
+        )
+        return courses

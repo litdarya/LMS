@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
 
 
 class User(ABC):
@@ -38,6 +38,10 @@ class User(ABC):
     @property
     @abstractmethod
     async def is_professor(self):
+        pass
+
+    @abstractmethod
+    async def courses_list(self) -> List[Dict[str, str]]:
         pass
 
     @abstractmethod

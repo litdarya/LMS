@@ -32,7 +32,7 @@ CREATE table student_group (
 CREATE table student(
     user_id integer REFERENCES users (user_id) UNIQUE NOT NULL,
     PRIMARY KEY (user_id),
-    group_name integer REFERENCES student_group (group_name) NOT NULL,
+    group_name VARCHAR (50) REFERENCES student_group (group_name) NOT NULL,
     entry_year     integer,
     CONSTRAINT valid_entry_year CHECK (1900 <= entry_year and entry_year <= 2100),
     degree         degree_t,
@@ -61,7 +61,7 @@ CREATE TABLE course_material (
 
 CREATE TABLE course_to_professor (
     course_id integer REFERENCES course (course_id) NOT NULL,
-    professor_id integer REFERENCES professors (user_id),
+    professor_id integer REFERENCES professors (user_id) NOT NULL,
     PRIMARY KEY (course_id, professor_id)
 );
 
@@ -71,10 +71,10 @@ CREATE TABLE course_to_editor (
     PRIMARY KEY (course_id, user_id)
 );
 
-CREATE TABLE course_to_member (
+CREATE TABLE group_to_course (
+    group_name VARCHAR (50) REFERENCES student_group (group_name) NOT NULL,
     course_id integer REFERENCES course (course_id) NOT NULL,
-    user_id integer REFERENCES users (user_id),
-    PRIMARY KEY (course_id, user_id)
+    PRIMARY KEY (group_name, course_id)
 );
 
 CREATE TABLE assignee (

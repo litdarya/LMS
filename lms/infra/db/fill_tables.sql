@@ -57,26 +57,14 @@ VALUES (3, 'ARCH', 'software architecture');
 
 
 -- adding 595, 596 to cv, 595 to ALGO, 596 to ARCH
-INSERT INTO course_to_member (
-    SELECT 1, user_id
-    FROM student
-    WHERE group_name='595'
-);
-INSERT INTO course_to_member (
-    SELECT 1, user_id
-    FROM student
-    WHERE group_name='596'
-);
-INSERT INTO course_to_member (
-    SELECT 2, user_id
-    FROM student
-    WHERE group_name='595'
-);
-INSERT INTO course_to_member (
-    SELECT 3, user_id
-    FROM student
-    WHERE group_name=596
-);
+INSERT INTO group_to_course (group_name, course_id)
+VALUES ('595', 1);
+INSERT INTO group_to_course (group_name, course_id)
+VALUES ('596', 1);
+INSERT INTO group_to_course (group_name, course_id)
+VALUES ('595', 2);
+INSERT INTO group_to_course (group_name, course_id)
+VALUES ('596', 3);
 
 -- CV: 6, 7; ALGo: 7, 8; ARCH: 8
 INSERT INTO course_to_professor (course_id, professor_id)
