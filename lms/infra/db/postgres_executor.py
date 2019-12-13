@@ -38,3 +38,13 @@ async def fetch_val(
     pool = await get_pool()
     async with pool.acquire() as connection:
         return await connection.fetchval(query, *params)
+
+
+async def fetch_row(
+        *,
+        query: str,
+        params: Optional[Tuple[Any, ...]] = tuple()
+) -> asyncpg.Record:
+    pool = await get_pool()
+    async with pool.acquire() as connection:
+        return await connection.fetchrow(query, *params)

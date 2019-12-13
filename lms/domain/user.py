@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
+
 class User(ABC):
     DEFAULT_PARAMS = (
         'name',
