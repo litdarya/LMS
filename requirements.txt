@@ -1,0 +1,9 @@
+wheel
+codecov
+asyncpg>=0.20.0
+Click>=7.0
+idna==2.8
+SQLAlchemy>=1.3.11
+tornado>=5.0.2
+tornado-sqlalchemy>=0.6.1
+urllib3>=1.24
