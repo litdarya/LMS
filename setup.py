@@ -1,17 +1,26 @@
+#!/usr/bin/env python3
+
 from setuptools import setup, find_packages
 
 setup(
     name='lms',
     version='0.0',
     packages=find_packages(),
-    url='',
-    license='',
-    author='alexander and darya',
+    url='https://github.com/litdarya/LMS',
+    license='MIT',
+    author='litdarya',
+    author_email="litv.daria@gmail.com",
     description='',
+    setup_requires=[
+        "pytest-runner",
+        "pytest-pylint",
+        "pytest-pycodestyle",
+        "pytest-pep257",
+        "pytest-cov",
+    ],
     install_requires=[
-        'click==7.0',
-        'asyncpg>=0.18.0',
-        'tornado==5.0.2',
-        'requests==2.21.0',
-    ]
+    ],
+    tests_require=[
+        "pytest-pylint",
+    ],
 )
