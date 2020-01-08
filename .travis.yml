@@ -1,0 +1,11 @@
+language: python
+python:
+  - "3.8"
+install:
+  - pip install -r requirements.txt
+script:
+  - python3 setup.py test
+env:
+  - CODECOV_TOKEN=0a7527a6-e25b-4081-bbd1-f08dcb16fb6c
+after_success:
+  - codecov
