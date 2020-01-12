@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, List, Dict
+from typing import Iterable, List, Dict
 
 from lms.domain.student import Student
 from lms.infra.sql_course import SqlCourse
@@ -7,9 +7,6 @@ import lms.infra.db.postgres_executor as pe
 
 
 class SqlStudent(SqlUser, Student):
-    def __init__(self, *, user_id):
-        super().__init__(user_id=user_id)
-
     async def get_info(
             self,
             *,

@@ -2,7 +2,7 @@ from typing import Dict, Optional, Iterable
 import lms.infra.db.postgres_executor as pe
 
 
-class SqlCourse(object):
+class SqlCourse:
     def __init__(self, *, course_id):
         self.course_id = course_id
 

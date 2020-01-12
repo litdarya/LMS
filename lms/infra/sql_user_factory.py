@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+
 from typing import Union
 
 from lms.domain.user_factory import UserFactory
