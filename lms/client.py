@@ -1,3 +1,5 @@
+# pylint: disable=no-value-for-parameter
+
 import click
 from tornado import ioloop
 from tornado.web import Application
