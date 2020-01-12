@@ -1,15 +1,14 @@
-from typing import Iterable, Dict, List
+# pylint: disable=W0223
+
+from typing import Iterable, Dict
+
+from abc import ABCMeta
 
 from lms.domain.user import User
-# from lms.infra.sql_student import SqlStudent
-# from lms.infra.sql_professor import SqlProfessor
 import lms.infra.db.postgres_executor as pe
 
 
-class SqlUser(User):
-    def __init__(self, *, user_id):
-        super().__init__(user_id=user_id)
-
+class SqlUser(User, metaclass=ABCMeta):
     @staticmethod
     async def check_is_professor(*, user_id) -> bool:
         query = "SELECT user_id FROM professors WHERE user_id = $1"

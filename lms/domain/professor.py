@@ -5,9 +5,6 @@ from lms.domain.user import User
 class Professor(User):
     DEFAULT_PARAMS = User.DEFAULT_PARAMS
 
-    def __init__(self, *, user_id):
-        super().__init__(user_id=user_id)
-
     @property
     async def is_professor(self):
         return True

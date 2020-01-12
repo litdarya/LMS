@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+
 from abc import ABC, abstractmethod
 from typing import Union
 from lms.domain.student import Student
