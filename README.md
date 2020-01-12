@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/litdarya/LMS.svg?token=JtpoL6qhaq8diBuzrTpZ&branch=master)](https://travis-ci.com/litdarya/LMS)
+
 # LMS
 
 ## DEV
