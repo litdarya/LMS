@@ -1,4 +1,4 @@
-from typing import Iterable, List, Dict
+from typing import Iterable, List, Dict, Optional
 
 from lms.domain.professor import Professor
 from lms.infra.sql_course import SqlCourse
@@ -10,9 +10,9 @@ class SqlProfessor(SqlUser, Professor):
     async def get_info(
             self,
             *,
-            params: Iterable[str] = Professor.DEFAULT_PARAMS
+            properties: Optional[Iterable[str]] = None
     ):
-        professor_info = await SqlUser.get_info(self, params=params)
+        professor_info = await SqlUser.get_info(self, properties=properties)
         if professor_info:
             professor_info['role'] = 'professor'
         return professor_info

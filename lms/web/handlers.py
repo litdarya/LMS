@@ -14,7 +14,7 @@ class PingHandler(RequestHandler):
         'status': 'ok',
     }
 
-    def get(self, *args, **kwargs):
+    def get(self):
         self.write(self._response)
         self.set_status(200)
         self.finish()
@@ -23,6 +23,9 @@ class PingHandler(RequestHandler):
 class UserHandler(RequestHandler):
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
+        self.body = None
+        self.user_id = None
+        self.user_factory = None
         self.user = None
 
     def initialize(self, user_factory):
@@ -77,6 +80,10 @@ class UserCoursesHandler(UserHandler):
 
 
 class EditUserInfoHandler(UserHandler):
+    def __init__(self, application, request, **kwargs):
+        super().__init__(application, request, **kwargs)
+        self.update = None
+
     def initialize(self, user_factory):
         super().initialize(user_factory)
         self.update = self.body.get('update')
@@ -111,7 +118,7 @@ class GroupHandler(RequestHandler):
         'group': [],
     }
 
-    async def get(self, *args, **kwargs):
+    async def get(self):
         res = await pe.fetch(
             query="SELECT group_name, department, course_no FROM student_group"
         )

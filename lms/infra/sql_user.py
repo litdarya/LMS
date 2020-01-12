@@ -1,6 +1,6 @@
-# pylint: disable=W0223
+# pylint: disable=abstract-method
 
-from typing import Iterable, Dict
+from typing import Iterable, Dict, Optional
 
 from abc import ABCMeta
 
@@ -21,26 +21,26 @@ class SqlUser(User, metaclass=ABCMeta):
     async def get_info(
             self,
             *,
-            params: Iterable[str] = User.DEFAULT_PARAMS
+            properties: Optional[Iterable[str]] = None
     ):
         query = f"""SELECT * FROM users WHERE user_id=$1"""
-        records = await pe.fetch(
+        user_record = await pe.fetch_row(
             query=query,
             params=(self.user_id,)
         )
-        for record in records:
-            user = {}
-            for param in params:
-                user[param] = record.get(param, None)
-            return user
-        return None
+        if user_record is None:
+            return None
+        user = {}
+        for param in properties:
+            user[param] = user_record.get(param, None)
+        return user
 
     async def update_info(
             self,
             *,
             update: Dict
     ):
-        fields = list(update.keys() & User.EDITABLE_PARAMS)
+        fields = list(update.keys() & self.editable_properties())
         fields_str = ", ".join(fields)
         fields_values = tuple([update[field] for field in fields])
         values_placeholders = ", ".join([f"${i + 2}" for i in range(len(fields))])
