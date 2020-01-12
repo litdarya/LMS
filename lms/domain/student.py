@@ -15,9 +15,6 @@ class Student(User):
         EXTRA_STUDENT_PARAMS
     )
 
-    def __init__(self, *, user_id):
-        super().__init__(user_id=user_id)
-
     @property
     async def is_professor(self):
         return False

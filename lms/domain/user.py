@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from typing import Dict, List
 
 
-class User(ABC):
+class User(metaclass=ABCMeta):
     DEFAULT_PARAMS = (
         'name',
         'email',
