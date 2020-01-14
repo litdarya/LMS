@@ -25,6 +25,8 @@ class SqlStudent(SqlUser, Student):
             params=(self.user_id,)
         )
         student_info_record = await student_info_record_future
+        if student_info_record is None:
+            return None
         return update_dict_with_keys({}, dict(student_info_record), properties)
 
     async def get_info(
@@ -32,14 +34,16 @@ class SqlStudent(SqlUser, Student):
             *,
             properties: Optional[Iterable[str]] = None
     ):
-        if properties is None:
+        if not properties:
             properties = self.properties()
         properties = set(properties)
         if not properties.issubset(self.properties()):
             return ValueError("parameter properties is not subset of student properties")
 
         extra_fields = properties & set(Student.EXTRA_STUDENT_PROPERTIES)
-        user_fields = list(properties & set(User.properties(self)))
+        if not self.authenticated:
+            extra_fields -= set(self.hidden_properties())
+        user_fields = list(properties & set(User.USER_PROPERTIES))
         user_info_future = SqlUser.get_info(self, properties=user_fields)
         student_info_future = self._get_extra_student_info(properties=extra_fields)
         user_info = await user_info_future
@@ -48,6 +52,7 @@ class SqlStudent(SqlUser, Student):
             return None
         assert user_info is not None, 'have row in students table but not in users'
         student_info.update(user_info)
+        student_info['role'] = 'student'
         return student_info
 
     async def courses_list(self) -> List[Dict[str, str]]:

@@ -30,8 +30,13 @@ class User(metaclass=ABCMeta):
     def editable_properties(self):
         return self.EDITABLE_USER_PROPERTIES
 
-    def __init__(self, *, user_id):
+    @staticmethod
+    def hidden_properties():
+        return tuple()
+
+    def __init__(self, *, user_id, authenticated=False):
         self.user_id = user_id
+        self.authenticated = authenticated
 
     @abstractmethod
     async def get_info(
