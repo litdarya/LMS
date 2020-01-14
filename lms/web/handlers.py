@@ -190,8 +190,6 @@ class EditUserInfoHandler(AuthUserHandler):
                 )
 
 
-
-
 class GroupHandler(RequestHandler):
     _response = {
         'status': 'ok',
