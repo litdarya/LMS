@@ -3,8 +3,12 @@
 # pylint: disable=attribute-defined-outside-init
 
 import json
+from typing import Optional
 
-from tornado.web import RequestHandler
+from tornado.web import (
+    RequestHandler,
+    authenticated,
+)
 
 import lms.infra.db.postgres_executor as pe
 
@@ -23,9 +27,18 @@ class PingHandler(RequestHandler):
 class UserHandler(RequestHandler):
     def initialize(self, user_factory):
         self.user_factory = user_factory
+        self.body = dict()
+        if self.request.body:
+            self.body = json.loads(self.request.body)
 
-    def get_current_user(self):
+    def get_current_user(self) -> Optional[bytes]:
         return self.get_secure_cookie('user_id')
+
+    def get_current_user_id(self) -> Optional[int]:
+        user_id = self.get_current_user()
+        if user_id:
+            return int(user_id)
+        return None
 
     def _bad_request(self, status=400, *, msg):
         self.set_status(status)
@@ -36,7 +49,7 @@ class UserHandler(RequestHandler):
         self.finish()
 
 
-class GetUserId(UserHandler):
+class GetUserIdHandler(UserHandler):
     def get(self):
         user_id = self.get_current_user()
         if user_id:
@@ -49,7 +62,6 @@ class GetUserId(UserHandler):
 class LoginHandler(UserHandler):
     def initialize(self, user_factory):
         super().initialize(user_factory=user_factory)
-        self.body = json.loads(self.request.body)
         self.email = self.body.get('email')
         self.password = self.body.get('password')
 
@@ -61,7 +73,6 @@ class LoginHandler(UserHandler):
         self.finish()
 
     async def post(self):
-        self.body = json.loads(self.request.body)
         user_id = await self.user_factory.login_user(email=self.email, password=self.password)
         if user_id:
             self.set_secure_cookie("user_id", str(user_id))
@@ -97,26 +108,61 @@ class RegisterHandler(UserHandler):
 
 
 class AuthUserHandler(UserHandler):
+    @authenticated
     def initialize(self, user_factory):
         super().initialize(user_factory=user_factory)
-        self.body = json.loads(self.request.body)
-        self.user_id = self.body.get('user_id')
+        self.user_id = self.get_current_user_id()
+        assert self.user_id
 
     async def prepare(self):
-        if self.user_id is None:
-            self._bad_request(msg='expected user_id in post body')
         self.user = await self.user_factory.get_student_or_professor(
             user_id=self.user_id
         )
 
 
-class UserInfoHandler(AuthUserHandler):
-    async def post(self):
-        self.info = await self.user.get_info()
+class UserInfoHandler(UserHandler):
+    def initialize(self, user_factory):
+        super().initialize(user_factory)
+        self.user_id = self.get_current_user_id()
+        self.authenticated = self.user_id is not None
+        if self.get_argument('user_id', default=None):
+            self.user_id = self.get_argument('user_id')
+            if self.user_id:
+                self.user_id = int(self.user_id)
+            self.authenticated &= self.user_id == self.get_current_user_id()
+
+    async def prepare(self):
+        if self.user_id is not None:
+            self.user = await self.user_factory.get_student_or_professor(
+                user_id=self.user_id,
+                authenticated=self.authenticated
+            )
+
+    async def get(self):
+        if not self.user_id:
+            self._bad_request(msg='expected user_id within GET argument')
+            assert False
+        info = await self.user.get_info()
         self.write({
             'status': 'ok',
-            'info': self.info,
+            'info': info,
         })
+
+    @authenticated
+    async def post(self):
+        to_update = self.body.get('update')
+        updated = await self.user.update_info(update=to_update)
+        if updated:
+            self.write({
+                'status': 'ok',
+                'updated': True,
+                'msg': f'successfully update info for user_id = {self.user_id}',
+            })
+        else:
+            self.write({
+                'status': 'err',
+                'updated': False,
+            })
 
 
 class UserCoursesHandler(AuthUserHandler):
@@ -143,18 +189,7 @@ class EditUserInfoHandler(AuthUserHandler):
                     msg=f'unexpected field {param} does not exist or cannot be updated'
                 )
 
-    async def post(self):
-        updated = await self.user.update_info(update=self.update)
-        if updated:
-            self.write({
-                'status': 'ok',
-                'updated': updated,
-            })
-        else:
-            self.write({
-                'status': 'error',
-                'updated': 'false',
-            })
+
 
 
 class GroupHandler(RequestHandler):

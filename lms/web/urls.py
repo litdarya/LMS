@@ -6,22 +6,20 @@ from lms.web.handlers import (
     PingHandler,
     LoginHandler,
     RegisterHandler,
-    GetUserId,
+    GetUserIdHandler,
     GroupHandler,
     UserInfoHandler,
     UserCoursesHandler,
-    EditUserInfoHandler,
 )
 
-PING_URL = (r'/ping', PingHandler)
+PING_URL = (r'/ping?', PingHandler)
 URLS = [
-    (r'/login/', LoginHandler, dict(user_factory=SqlUserFactory)),
-    (r'/register/', RegisterHandler, dict(user_factory=SqlUserFactory)),
-    (r'/get_user_id/', GetUserId, dict(user_factory=SqlUserFactory)),
-    (r'/list_groups/', GroupHandler),
-    (r'/user_info/', UserInfoHandler, dict(user_factory=SqlUserFactory)),
-    (r'/user_courses/', UserCoursesHandler, dict(user_factory=SqlUserFactory)),
-    (r'/edit_user_info/', EditUserInfoHandler, dict(user_factory=SqlUserFactory)),
+    (r'/login/?', LoginHandler, dict(user_factory=SqlUserFactory)),
+    (r'/register/?', RegisterHandler, dict(user_factory=SqlUserFactory)),
+    (r'/user/id/?', GetUserIdHandler, dict(user_factory=SqlUserFactory)),
+    (r'/user/groups/?', GroupHandler),
+    (r'/user/info/?', UserInfoHandler, dict(user_factory=SqlUserFactory)),
+    (r'/user/courses/?', UserCoursesHandler, dict(user_factory=SqlUserFactory)),
 ]
 
 

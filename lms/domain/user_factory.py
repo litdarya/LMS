@@ -9,7 +9,11 @@ from lms.domain.professor import Professor
 class UserFactory(ABC):
     @staticmethod
     @abstractmethod
-    async def get_student_or_professor(*, user_id) -> Union[Student, Professor]:
+    async def get_student_or_professor(
+            *,
+            user_id: int,
+            authenticated=False
+    ) -> Union[Student, Professor]:
         pass
 
     @staticmethod

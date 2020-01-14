@@ -47,7 +47,7 @@ class SqlUser(User, metaclass=ABCMeta):
         return True, 'successfully updated'
 
     @staticmethod
-    async def check_is_professor(*, user_id) -> bool:
+    async def check_is_professor(*, user_id: int) -> bool:
         query = "SELECT user_id FROM professors WHERE user_id = $1"
         resolved_user_id = await pe.fetch_val(
             query=query,
@@ -79,6 +79,7 @@ class SqlUser(User, metaclass=ABCMeta):
             *,
             update: Dict
     ):
+        assert self.authenticated
         fields = list(update.keys() & self.editable_properties())
         fields_str = ", ".join(fields)
         fields_values = tuple([update[field] for field in fields])

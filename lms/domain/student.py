@@ -15,10 +15,12 @@ class Student(User, metaclass=ABCMeta):
     )
 
     def properties(self):
-        return User.properties(self) + self.EXTRA_STUDENT_PROPERTIES
+        return super().properties() + self.EXTRA_STUDENT_PROPERTIES
+
+    @staticmethod
+    def hidden_properties():
+        return ('education_form', )
 
     @property
     async def is_professor(self):
         return False
-
-    # params=('name', 'email', 'telephone', 'city', 'info', 'vk_link')
