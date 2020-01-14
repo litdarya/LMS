@@ -3,7 +3,9 @@
 # pylint: disable=attribute-defined-outside-init
 
 import json
-from typing import Optional
+from typing import Optional, Any
+
+import tornado.web
 
 from tornado.web import (
     RequestHandler,
@@ -24,7 +26,23 @@ class PingHandler(RequestHandler):
         self.finish()
 
 
-class UserHandler(RequestHandler):
+class BaseHandler(RequestHandler):
+    def write_error(self, status_code: int, **kwargs: Any) -> None:
+        self.finish({
+            'code': status_code,
+            'msg': self._reason,
+        })
+
+
+class NotFoundHandler(BaseHandler):
+    def prepare(self):
+        raise tornado.web.HTTPError(
+            status_code=404,
+            reason="Invalid resource path."
+        )
+
+
+class UserHandler(BaseHandler):
     def initialize(self, user_factory):
         self.user_factory = user_factory
         self.body = dict()

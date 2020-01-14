@@ -4,6 +4,7 @@ from lms.infra.sql_user_factory import SqlUserFactory
 
 from lms.web.handlers import (
     PingHandler,
+    NotFoundHandler,
     LoginHandler,
     RegisterHandler,
     GetUserIdHandler,
@@ -20,6 +21,7 @@ URLS = [
     (r'/user/groups/?', GroupHandler),
     (r'/user/info/?', UserInfoHandler, dict(user_factory=SqlUserFactory)),
     (r'/user/courses/?', UserCoursesHandler, dict(user_factory=SqlUserFactory)),
+    (r"(.*)", NotFoundHandler),
 ]
 
 
