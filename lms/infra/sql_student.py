@@ -25,6 +25,8 @@ class SqlStudent(SqlUser, Student):
             params=(self.user_id,)
         )
         student_info_record = await student_info_record_future
+        if student_info_record is None:
+            return None
         return update_dict_with_keys({}, dict(student_info_record), properties)
 
     async def get_info(
@@ -32,8 +34,6 @@ class SqlStudent(SqlUser, Student):
             *,
             properties: Optional[Iterable[str]] = None
     ):
-        if properties is None:
-            properties = self.properties()
         properties = set(properties)
         if not properties.issubset(self.properties()):
             return ValueError("parameter properties is not subset of student properties")

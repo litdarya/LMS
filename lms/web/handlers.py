@@ -1,8 +1,8 @@
 # pylint: disable=abstract-method
 # pylint: disable=arguments-differ
+# pylint: disable=attribute-defined-outside-init
 
 import json
-from abc import abstractmethod
 
 from tornado.web import RequestHandler
 
@@ -21,25 +21,86 @@ class PingHandler(RequestHandler):
 
 
 class UserHandler(RequestHandler):
-    def __init__(self, application, request, **kwargs):
-        super().__init__(application, request, **kwargs)
-        self.body = None
-        self.user_id = None
-        self.user_factory = None
-        self.user = None
-
     def initialize(self, user_factory):
-        self.body = json.loads(self.request.body)
-        self.user_id = self.body.get('user_id')
         self.user_factory = user_factory
 
-    def _bad_request(self, *, msg):
-        self.set_status(400)
+    def get_current_user(self):
+        return self.get_secure_cookie('user_id')
+
+    def _bad_request(self, status=400, *, msg):
+        self.set_status(status)
         self.write({
             'status': 'err',
             'msg': msg
         })
         self.finish()
+
+
+class GetUserId(UserHandler):
+    def get(self):
+        user_id = self.get_current_user()
+        if user_id:
+            user_id = user_id.decode('utf-8')
+        self.write({
+            'user_id': user_id
+        })
+
+
+class LoginHandler(UserHandler):
+    def initialize(self, user_factory):
+        super().initialize(user_factory=user_factory)
+        self.body = json.loads(self.request.body)
+        self.email = self.body.get('email')
+        self.password = self.body.get('password')
+
+    def get(self):
+        self.write({
+            'status': 'err',
+            'msg': 'need to login'
+        })
+        self.finish()
+
+    async def post(self):
+        self.body = json.loads(self.request.body)
+        user_id = await self.user_factory.login_user(email=self.email, password=self.password)
+        if user_id:
+            self.set_secure_cookie("user_id", str(user_id))
+            self.write({
+                'status': 'ok',
+                'msg': 'successfully logged in, set cookies in header',
+            })
+        else:
+            self._bad_request(status=401, msg='incorrect email or password')
+
+
+class RegisterHandler(UserHandler):
+    def initialize(self, user_factory):
+        super().initialize(user_factory=user_factory)
+        self.body = json.loads(self.request.body)
+        self.verification_code = self.body.get('verification_code')
+        self.email = self.body.get('email')
+        self.password = self.body.get('password')
+
+    async def post(self):
+        success, msg = await self.user_factory.register_user(
+            verification_code=self.verification_code,
+            email=self.email,
+            password=self.password
+        )
+        if not success:
+            self._bad_request(status=401, msg=msg)
+        else:
+            self.write({
+                'status': 'ok',
+                'msg': msg,
+            })
+
+
+class AuthUserHandler(UserHandler):
+    def initialize(self, user_factory):
+        super().initialize(user_factory=user_factory)
+        self.body = json.loads(self.request.body)
+        self.user_id = self.body.get('user_id')
 
     async def prepare(self):
         if self.user_id is None:
@@ -48,16 +109,8 @@ class UserHandler(RequestHandler):
             user_id=self.user_id
         )
 
-    @abstractmethod
-    async def post(self, *args, **kwargs):
-        pass
 
-
-class UserInfoHandler(UserHandler):
-    def __init__(self, application, request, **kwargs):
-        super().__init__(application, request, **kwargs)
-        self.info = None
-
+class UserInfoHandler(AuthUserHandler):
     async def post(self):
         self.info = await self.user.get_info()
         self.write({
@@ -66,11 +119,7 @@ class UserInfoHandler(UserHandler):
         })
 
 
-class UserCoursesHandler(UserHandler):
-    def __init__(self, application, request, **kwargs):
-        super().__init__(application, request, **kwargs)
-        self.courses = None
-
+class UserCoursesHandler(AuthUserHandler):
     async def post(self):
         self.courses = await self.user.courses_list()
         self.write({
@@ -79,11 +128,7 @@ class UserCoursesHandler(UserHandler):
         })
 
 
-class EditUserInfoHandler(UserHandler):
-    def __init__(self, application, request, **kwargs):
-        super().__init__(application, request, **kwargs)
-        self.update = None
-
+class EditUserInfoHandler(AuthUserHandler):
     def initialize(self, user_factory):
         super().initialize(user_factory)
         self.update = self.body.get('update')
@@ -98,7 +143,7 @@ class EditUserInfoHandler(UserHandler):
                     msg=f'unexpected field {param} does not exist or cannot be updated'
                 )
 
-    async def post(self, *args, **kwargs):
+    async def post(self):
         updated = await self.user.update_info(update=self.update)
         if updated:
             self.write({
@@ -129,4 +174,3 @@ class GroupHandler(RequestHandler):
             'groups': groups
         })
         self.set_status(200)
-        self.finish()
