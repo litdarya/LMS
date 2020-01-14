@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
-from typing import Dict, List
+from abc import ABCMeta, abstractmethod
+from typing import Dict, Iterable, List, Optional
 
 
-class User(ABC):
-    DEFAULT_PARAMS = (
+class User(metaclass=ABCMeta):
+    USER_PROPERTIES = (
         'name',
         'email',
         'telephone',
@@ -14,7 +14,7 @@ class User(ABC):
         'fb_link',
         'linkedin_link',
     )
-    EDITABLE_PARAMS = (
+    EDITABLE_USER_PROPERTIES = (
         'telephone',
         'city',
         'info',
@@ -24,6 +24,12 @@ class User(ABC):
         'linkedin_link',
     )
 
+    def properties(self):
+        return self.USER_PROPERTIES
+
+    def editable_properties(self):
+        return self.EDITABLE_USER_PROPERTIES
+
     def __init__(self, *, user_id):
         self.user_id = user_id
 
@@ -31,7 +37,7 @@ class User(ABC):
     async def get_info(
             self,
             *,
-            params=DEFAULT_PARAMS
+            properties: Optional[Iterable[str]] = None
     ):
         pass
 

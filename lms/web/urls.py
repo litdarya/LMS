@@ -1,5 +1,5 @@
+from typing import List, Tuple
 from tornado.web import RequestHandler
-from typing import List, Tuple, Type
 from lms.infra.sql_user_factory import SqlUserFactory
 
 from lms.web.handlers import (
@@ -10,8 +10,8 @@ from lms.web.handlers import (
     EditUserInfoHandler,
 )
 
-ping_url = (r'/ping', PingHandler)
-urls = [
+PING_URL = (r'/ping', PingHandler)
+URLS = [
     (r'/list_groups/', GroupHandler),
     (r'/user_info/', UserInfoHandler, dict(user_factory=SqlUserFactory)),
     (r'/user_courses/', UserCoursesHandler, dict(user_factory=SqlUserFactory)),
@@ -20,4 +20,4 @@ urls = [
 
 
 def get_all_urls() -> List[Tuple[str, RequestHandler]]:
-    return [ping_url] + urls
+    return [PING_URL] + URLS

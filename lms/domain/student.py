@@ -1,31 +1,24 @@
-from abc import abstractmethod
+# pylint: disable=abstract-method
+
+from abc import ABCMeta
+
 from lms.domain.user import User
 
 
-class Student(User):
-    EXTRA_STUDENT_PARAMS = (
+class Student(User, metaclass=ABCMeta):
+    EXTRA_STUDENT_PROPERTIES = (
         'group_name',
         'entry_year',
         'degree',
         'study_form',
         'education_form',
     )
-    DEFAULT_PARAMS = (
-        User.DEFAULT_PARAMS +
-        EXTRA_STUDENT_PARAMS
-    )
 
-    def __init__(self, *, user_id):
-        super().__init__(user_id=user_id)
+    def properties(self):
+        return User.properties(self) + self.EXTRA_STUDENT_PROPERTIES
 
     @property
     async def is_professor(self):
         return False
 
-    @abstractmethod
-    async def get_info(
-            self,
-            *,
-            params=('name', 'email', 'telephone', 'city', 'info', 'vk_link')
-    ):
-        pass
+    # params=('name', 'email', 'telephone', 'city', 'info', 'vk_link')

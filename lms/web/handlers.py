@@ -1,3 +1,6 @@
+# pylint: disable=abstract-method
+# pylint: disable=arguments-differ
+
 import json
 from abc import abstractmethod
 
@@ -18,6 +21,13 @@ class PingHandler(RequestHandler):
 
 
 class UserHandler(RequestHandler):
+    def __init__(self, application, request, **kwargs):
+        super().__init__(application, request, **kwargs)
+        self.body = None
+        self.user_id = None
+        self.user_factory = None
+        self.user = None
+
     def initialize(self, user_factory):
         self.body = json.loads(self.request.body)
         self.user_id = self.body.get('user_id')
@@ -39,13 +49,14 @@ class UserHandler(RequestHandler):
         )
 
     @abstractmethod
-    async def post(self):
+    async def post(self, *args, **kwargs):
         pass
 
 
 class UserInfoHandler(UserHandler):
-    def initialize(self, user_factory):
-        super().initialize(user_factory)
+    def __init__(self, application, request, **kwargs):
+        super().__init__(application, request, **kwargs)
+        self.info = None
 
     async def post(self):
         self.info = await self.user.get_info()
@@ -56,8 +67,9 @@ class UserInfoHandler(UserHandler):
 
 
 class UserCoursesHandler(UserHandler):
-    def initialize(self, user_factory):
-        super().initialize(user_factory)
+    def __init__(self, application, request, **kwargs):
+        super().__init__(application, request, **kwargs)
+        self.courses = None
 
     async def post(self):
         self.courses = await self.user.courses_list()
@@ -68,6 +80,10 @@ class UserCoursesHandler(UserHandler):
 
 
 class EditUserInfoHandler(UserHandler):
+    def __init__(self, application, request, **kwargs):
+        super().__init__(application, request, **kwargs)
+        self.update = None
+
     def initialize(self, user_factory):
         super().initialize(user_factory)
         self.update = self.body.get('update')
@@ -82,7 +98,7 @@ class EditUserInfoHandler(UserHandler):
                     msg=f'unexpected field {param} does not exist or cannot be updated'
                 )
 
-    async def post(self):
+    async def post(self, *args, **kwargs):
         updated = await self.user.update_info(update=self.update)
         if updated:
             self.write({

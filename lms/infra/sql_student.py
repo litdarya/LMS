@@ -1,46 +1,58 @@
-from typing import Iterable, Optional, List, Dict
+from typing import Iterable, List, Dict, Optional
 
 from lms.domain.student import Student
+from lms.domain.user import User
 from lms.infra.sql_course import SqlCourse
 from lms.infra.sql_user import SqlUser
 import lms.infra.db.postgres_executor as pe
 
 
-class SqlStudent(SqlUser, Student):
-    def __init__(self, *, user_id):
-        super().__init__(user_id=user_id)
+def update_dict_with_keys(dict_to_update: dict, other_dict: dict, keys):
+    for key in keys:
+        dict_to_update[key] = other_dict[key]
+    return dict_to_update
 
-    async def get_info(
-            self,
-            *,
-            params: Iterable[str] = Student.DEFAULT_PARAMS
-    ):
-        extra_fields = set(params) & set(Student.EXTRA_STUDENT_PARAMS)
-        user_fields = list(set(params) & set(SqlUser.DEFAULT_PARAMS))
+
+class SqlStudent(SqlUser, Student):
+    async def _get_extra_student_info(self, *, properties: Iterable[str]):
         query = """
             SELECT *
             FROM student
             WHERE student.user_id = $1
         """
-        record_future = pe.fetch_row(
+        student_info_record_future = pe.fetch_row(
             query=query,
             params=(self.user_id,)
         )
-        student_info_future = SqlUser.get_info(self, params=user_fields)
-        record = await record_future
-        if record is None:
-            return None
-        student_info = await student_info_future
+        student_info_record = await student_info_record_future
+        return update_dict_with_keys({}, dict(student_info_record), properties)
 
-        assert student_info is not None, 'have row in students table but not in users'
-        for field in extra_fields:
-            student_info[field] = record.get(field, None)
-        student_info['role'] = 'student'
+    async def get_info(
+            self,
+            *,
+            properties: Optional[Iterable[str]] = None
+    ):
+        if properties is None:
+            properties = self.properties()
+        properties = set(properties)
+        if not properties.issubset(self.properties()):
+            return ValueError("parameter properties is not subset of student properties")
+
+        extra_fields = properties & set(Student.EXTRA_STUDENT_PROPERTIES)
+        user_fields = list(properties & set(User.properties(self)))
+        user_info_future = SqlUser.get_info(self, properties=user_fields)
+        student_info_future = self._get_extra_student_info(properties=extra_fields)
+        user_info = await user_info_future
+        student_info = await student_info_future
+        if student_info is None:
+            return None
+        assert user_info is not None, 'have row in students table but not in users'
+        student_info.update(user_info)
         return student_info
 
     async def courses_list(self) -> List[Dict[str, str]]:
         print('student')
-        info = await self.get_info(params=('group_name',))
+        info = await self.get_info(properties=('group_name',))
         group_name = info.get('group_name')
         if group_name is None:
             print('no group name')

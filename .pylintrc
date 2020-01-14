@@ -1,0 +1,6 @@
+[MESSAGE CONTROL]
+disable=missing-docstring
+
+[SIMILARITIES]
+# Minimum lines number of a similarity.
+min-similarity-lines=6
