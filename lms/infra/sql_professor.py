@@ -1,6 +1,8 @@
-from typing import Iterable, List, Dict, Optional
+from typing import Iterable, List, Optional
 
+from lms.domain.course import Course
 from lms.domain.professor import Professor
+
 from lms.infra.sql_course import SqlCourse
 from lms.infra.sql_user import SqlUser
 import lms.infra.db.postgres_executor as pe
@@ -19,7 +21,7 @@ class SqlProfessor(SqlUser, Professor):
             professor_info['role'] = 'professor'
         return professor_info
 
-    async def courses(self) -> List[Dict[str, str]]:
+    async def courses(self) -> List[Course]:
         query_course_ids = '''SELECT course_id
         FROM course_to_professor
         WHERE professor_id = $1'''
@@ -29,7 +31,8 @@ class SqlProfessor(SqlUser, Professor):
         )
         if records is None:
             return []
-        courses = await SqlCourse.resolve_courses(
-            course_ids=[record.get('course_id', None) for record in records]
-        )
+        courses = [
+            SqlCourse(course_id=record.get('course_id'))
+            for record in records
+        ]
         return courses

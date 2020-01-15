@@ -1,5 +1,6 @@
-from typing import Iterable, List, Dict, Optional
+from typing import Iterable, List, Optional
 
+from lms.domain.course import Course
 from lms.domain.student import Student
 from lms.domain.user import User
 from lms.infra.sql_course import SqlCourse
@@ -75,7 +76,7 @@ class SqlStudent(SqlUser, Student):
         assert group_name
         return await self._classmates(group_name)
 
-    async def courses(self) -> List[Dict[str, str]]:
+    async def courses(self) -> List[Course]:
         info = await self.get_info(properties=('group_name',))
         group_name = info.get('group_name')
         if group_name is None:
@@ -89,7 +90,5 @@ class SqlStudent(SqlUser, Student):
         )
         if records is None:
             return []
-        courses = await SqlCourse.resolve_courses(
-            course_ids=[record.get('course_id', None) for record in records]
-        )
+        courses = [SqlCourse(course_id=record.get('course_id')) for record in records]
         return courses

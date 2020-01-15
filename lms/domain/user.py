@@ -54,7 +54,7 @@ class User(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def courses(self) -> List[Dict[str, str]]:
+    async def courses(self) -> List['Course']:
         pass
 
     @abstractmethod

@@ -1,7 +1,7 @@
 # pylint: disable=abstract-method
 # pylint: disable=arguments-differ
 # pylint: disable=attribute-defined-outside-init
-import asyncio
+
 import json
 from typing import Optional, Any
 
@@ -126,13 +126,13 @@ class RegisterHandler(UserHandler):
 
 
 class AuthUserHandler(UserHandler):
-    @authenticated
     def initialize(self, user_factory):
         super().initialize(user_factory=user_factory)
-        self.user_id = self.get_current_user_id()
-        assert self.user_id
 
     async def prepare(self):
+        self.user_id = self.get_current_user_id()
+        if self.user_id is None:
+            raise tornado.web.HTTPError(403)
         self.user = await self.user_factory.get_student_or_professor(
             user_id=self.user_id
         )
@@ -205,11 +205,20 @@ class UserClassmatesHandler(AuthUserHandler):
 
 
 class UserCoursesHandler(AuthUserHandler):
-    async def post(self):
+    _COURSES_FIELDS = ('course_id', 'name')
+
+    async def prepare(self):
+        await super().prepare()
         self.courses = await self.user.courses()
+
+    async def get(self):
+        courses = [
+            await course.get_info(properties=self._COURSES_FIELDS)
+            for course in self.courses
+        ]
         self.write({
             'status': 'ok',
-            'courses': self.courses,
+            'courses': courses,
         })
 
 

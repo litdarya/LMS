@@ -1,6 +1,6 @@
 # pylint: disable=abstract-method
 
-from typing import Iterable, Dict, Optional, Tuple, List
+from typing import Iterable, Dict, Optional, Tuple
 from abc import ABCMeta
 
 from lms.domain.user import User
