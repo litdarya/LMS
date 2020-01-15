@@ -236,22 +236,3 @@ class EditUserInfoHandler(AuthUserHandler):
                 self._bad_request(
                     msg=f'unexpected field {param} does not exist or cannot be updated'
                 )
-
-
-class GroupHandler(RequestHandler):
-    _response = {
-        'status': 'ok',
-        'group': [],
-    }
-
-    async def get(self):
-        res = await pe.fetch(
-            query="SELECT group_name, department, course_no FROM student_group"
-        )
-        groups = []
-        for record in res:
-            groups.append(dict(record))
-        self.write({
-            'groups': groups
-        })
-        self.set_status(200)

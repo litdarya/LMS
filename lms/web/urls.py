@@ -20,7 +20,6 @@ URLS = [
     (r'/login/?', LoginHandler, dict(user_factory=SqlUserFactory)),
     (r'/register/?', RegisterHandler, dict(user_factory=SqlUserFactory)),
     (r'/user/id/?', GetUserIdHandler, dict(user_factory=SqlUserFactory)),
-    (r'/user/groups/?', GroupHandler),
     (r'/user/info/?', UserInfoHandler, dict(user_factory=SqlUserFactory)),
     (r'/user/classmates/?', UserClassmatesHandler, dict(user_factory=SqlUserFactory)),
     (r'/user/courses/?', UserCoursesHandler, dict(user_factory=SqlUserFactory)),
