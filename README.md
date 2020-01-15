@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.com/litdarya/LMS.svg?token=JtpoL6qhaq8diBuzrTpZ&branch=master)](https://travis-ci.com/litdarya/LMS)
 
+[![codecov](https://codecov.io/gh/litdarya/LMS/branch/master/graph/badge.svg)](https://codecov.io/gh/litdarya/LMS)
+
 # LMS
 
 Домашнее задание по требованиям https://gist.github.com/Invizory/9cd7e149bb476324faa1f665a9f8170d
