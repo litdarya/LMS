@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE degree_t as enum('bachelor', 'master', 'specialist');
 CREATE TYPE study_form_t as enum('fulltime', 'extramural', 'evening');
 CREATE TYPE education_form_t as enum('budget', 'contract');
@@ -81,5 +82,5 @@ CREATE TABLE assignee (
     course_id integer REFERENCES course (course_id) NOT NULL,
     start_time DATE NOT NULL,
     end_time DATE NOT NULL,
-    desciption TEXT
+    description TEXT
 );

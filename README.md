@@ -2,6 +2,39 @@
 
 # LMS
 
+## Первый запуск
+
+Сначала запускаем докер
+```(bash)
+# docker-compose up
+```
+
+Когда Docker запущен, можно заполнить создать и заполнить таблицы коммандами:
+```(bash)
+virtualenv venv
+source venv/bin/activate
+pip install -r lms/infra/db/manage_tables/requirements.txt
+python lms/infra/db/manage_tables/execute_script.py --script lms/infra/db/manage_tables/sql_scripts/create_tables.sql
+python lms/infra/db/manage_tables/execute_script.py --script lms/infra/db/manage_tables/sql_scripts/fill_tables.sql
+
+```
+Проверить таблицы можно через psql:
+Из контейнера:
+```(bash)
+sudo docker exec -it lms_postgres_1 bash
+psql -U admin -d lms_db
+```
+Локальный:
+```(bash)
+psql -U admin -d lms_db -h localhost
+```
+Проверка:
+```(postgresql)
+select * from users;
+```
+Должна получиться непустая таблица
+
+
 ## DEV
 > #### hint
 > Для быстроты разработки, секцию web в docker-compose следует закомментить, 
