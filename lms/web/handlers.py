@@ -12,8 +12,6 @@ from tornado.web import (
     authenticated,
 )
 
-import lms.infra.db.postgres_executor as pe
-
 
 class PingHandler(RequestHandler):
     _response = {

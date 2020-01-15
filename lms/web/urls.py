@@ -9,7 +9,6 @@ from lms.web.handlers import (
     LoginHandler,
     RegisterHandler,
     GetUserIdHandler,
-    GroupHandler,
     UserInfoHandler,
     UserClassmatesHandler,
     UserCoursesHandler,
