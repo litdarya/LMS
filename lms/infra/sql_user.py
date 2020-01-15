@@ -44,7 +44,7 @@ class SqlUser(User, metaclass=ABCMeta):
             params=(resolved_user_id, email, password)
         )
         assert user_id
-        return True, 'successfully updated'
+        return True, 'successfully registered'
 
     @staticmethod
     async def check_is_professor(*, user_id: int) -> bool:
