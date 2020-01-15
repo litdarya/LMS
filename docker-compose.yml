@@ -2,12 +2,6 @@ version: "3"
 
 services:
 # commented for testing
-  web:
-    build: .
-    networks:
-      - postgres-net
-    ports:
-      - "8000:8000"
 
   postgres:
     image: postgres:latest
@@ -22,6 +16,15 @@ services:
       POSTGRES_USER: admin
       POSTRGRES_PASSWORD: admin
     restart: always
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    networks:
+      - postgres-net
+    environment:
+      - postgres_host=lms_postgres_1
 
 volumes:
   postgres_data:

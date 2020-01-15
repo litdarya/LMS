@@ -1,5 +1,7 @@
 # pylint: disable=too-few-public-methods
 
+import os
+
 import asyncpg.pool as apg_pool
 import asyncpg
 
@@ -17,6 +19,10 @@ class AsyncPool:
 
     @staticmethod
     async def _create_pool() -> apg_pool.Pool:
+        conf = POSTGRES_CONNECTION_CONF
+        if os.environ.get('postgres_host', default=None):
+            conf['host'] = os.environ.get('postgres_host')
+            print('using postgres host from ENV: ', conf['host'])
         return await asyncpg.create_pool(**POSTGRES_CONNECTION_CONF)
 
 
