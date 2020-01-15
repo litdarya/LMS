@@ -60,8 +60,10 @@ class SqlUser(User, metaclass=ABCMeta):
             *,
             properties: Optional[Iterable[str]] = None
     ):
-        if not properties:
+        if properties is None:
             properties = self.properties()
+        if not properties:
+            return {}
         query = """SELECT * FROM users WHERE user_id=$1"""
         user_record = await pe.fetch_row(
             query=query,

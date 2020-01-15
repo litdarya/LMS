@@ -1,6 +1,7 @@
 # pylint: disable=abstract-method
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
+from typing import List
 
 from lms.domain.user import User
 
@@ -24,3 +25,7 @@ class Student(User, metaclass=ABCMeta):
     @property
     async def is_professor(self):
         return False
+
+    @abstractmethod
+    async def classmates(self) -> List['Student']:
+        pass
