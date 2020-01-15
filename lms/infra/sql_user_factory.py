@@ -31,4 +31,8 @@ class SqlUserFactory(UserFactory):
             email: str,
             password: str
     ) -> Tuple[bool, str]:
-        pass
+        return await SqlUser.register(
+            verification_code=verification_code,
+            email=email,
+            password=password
+        )
