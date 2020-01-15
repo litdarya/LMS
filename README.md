@@ -4,10 +4,13 @@
 
 ## Первый запуск
 
+### docker-compose
 Сначала запускаем докер
 ```(bash)
 # docker-compose up
 ```
+
+### Заполнение таблиц
 
 Когда Docker запущен, можно заполнить создать и заполнить таблицы коммандами:
 ```(bash)
@@ -18,7 +21,9 @@ python lms/infra/db/manage_tables/execute_script.py --script lms/infra/db/manage
 python lms/infra/db/manage_tables/execute_script.py --script lms/infra/db/manage_tables/sql_scripts/fill_tables.sql
 
 ```
-Проверить таблицы можно через psql:
+
+Проверить таблицы можно через psql.
+
 Из контейнера:
 ```(bash)
 sudo docker exec -it lms_postgres_1 bash
@@ -34,6 +39,19 @@ select * from users;
 ```
 Должна получиться непустая таблица
 
+> ### hint
+> Если вы хотите удалять таблицы, чтобы потом их пересоздать, воспользуйтесь drop_tables.sql:
+> ```(bash)
+> python lms/infra/db/manage_tables/execute_script.py --script lms/infra/db/manage_tables/sql_scripts/drop_tables.sql
+> ```
+
+### Итог
+Теперь у нас есть заполныенные таблицы, содержащие некоторое количество пользователей и преподавателей.
+
+## API
+
+Практически для всех действий нужна авторизация, поэтому прежде всего необходимо зарегистрировать пользователя.
+ 
 
 ## DEV
 > #### hint
