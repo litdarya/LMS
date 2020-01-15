@@ -12,12 +12,14 @@ class SqlProfessor(SqlUser, Professor):
             *,
             properties: Optional[Iterable[str]] = None
     ):
+        if properties is None:
+            properties = self.properties()
         professor_info = await SqlUser.get_info(self, properties=properties)
-        if professor_info:
+        if professor_info and 'role' in properties:
             professor_info['role'] = 'professor'
         return professor_info
 
-    async def courses_list(self) -> List[Dict[str, str]]:
+    async def courses(self) -> List[Dict[str, str]]:
         query_course_ids = '''SELECT course_id
         FROM course_to_professor
         WHERE professor_id = $1'''

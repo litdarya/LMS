@@ -1,7 +1,7 @@
 # pylint: disable=abstract-method
 # pylint: disable=arguments-differ
 # pylint: disable=attribute-defined-outside-init
-
+import asyncio
 import json
 from typing import Optional, Any
 
@@ -183,9 +183,30 @@ class UserInfoHandler(UserHandler):
             })
 
 
+class UserClassmatesHandler(AuthUserHandler):
+    _CLASSMATE_FIELDS = ('user_id', 'name')
+
+    async def prepare(self):
+        await super().prepare()
+        if await self.user.is_professor:
+            self._bad_request(status=405, msg='method classmates is not allowed for professor')
+        self.classmates = await self.user.classmates()
+
+    async def get(self):
+        classmates = []
+        for classmate in self.classmates:
+            classmates.append(
+                await classmate.get_info(properties=self._CLASSMATE_FIELDS)
+            )
+        self.write({
+            'status': 'ok',
+            'classmates': classmates,
+        })
+
+
 class UserCoursesHandler(AuthUserHandler):
     async def post(self):
-        self.courses = await self.user.courses_list()
+        self.courses = await self.user.courses()
         self.write({
             'status': 'ok',
             'courses': self.courses,

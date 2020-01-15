@@ -10,6 +10,7 @@ from lms.web.handlers import (
     GetUserIdHandler,
     GroupHandler,
     UserInfoHandler,
+    UserClassmatesHandler,
     UserCoursesHandler,
 )
 
@@ -20,6 +21,7 @@ URLS = [
     (r'/user/id/?', GetUserIdHandler, dict(user_factory=SqlUserFactory)),
     (r'/user/groups/?', GroupHandler),
     (r'/user/info/?', UserInfoHandler, dict(user_factory=SqlUserFactory)),
+    (r'/user/classmates/?', UserClassmatesHandler, dict(user_factory=SqlUserFactory)),
     (r'/user/courses/?', UserCoursesHandler, dict(user_factory=SqlUserFactory)),
     (r"(.*)", NotFoundHandler),
 ]
