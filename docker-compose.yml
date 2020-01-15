@@ -2,12 +2,12 @@ version: "3"
 
 services:
 # commented for testing
-#  web:
-#    build: .
-#    networks:
-#      - postgres-net
-#    ports:
-#      - "8000:8000"
+  web:
+    build: .
+    networks:
+      - postgres-net
+    ports:
+      - "8000:8000"
 
   postgres:
     image: postgres:latest
