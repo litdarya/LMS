@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.com/litdarya/LMS.svg?token=JtpoL6qhaq8diBuzrTpZ&branch=master)](https://travis-ci.com/litdarya/LMS)
-
-[![codecov](https://codecov.io/gh/litdarya/LMS/branch/master/graph/badge.svg)](https://codecov.io/gh/litdarya/LMS)
+[![Build Status](https://travis-ci.com/litdarya/LMS.svg?token=JtpoL6qhaq8diBuzrTpZ&branch=master)](https://travis-ci.com/litdarya/LMS) [![codecov](https://codecov.io/gh/litdarya/LMS/branch/master/graph/badge.svg)](https://codecov.io/gh/litdarya/LMS)
 
 # LMS
 
