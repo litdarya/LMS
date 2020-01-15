@@ -4,6 +4,8 @@ from typing import Dict, Iterable, List, Optional
 
 class User(metaclass=ABCMeta):
     USER_PROPERTIES = (
+        'user_id',
+        'role',
         'name',
         'email',
         'telephone',
@@ -52,7 +54,7 @@ class User(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def courses_list(self) -> List[Dict[str, str]]:
+    async def courses(self) -> List['Course']:
         pass
 
     @abstractmethod

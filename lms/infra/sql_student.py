@@ -1,5 +1,6 @@
-from typing import Iterable, List, Dict, Optional
+from typing import Iterable, List, Optional
 
+from lms.domain.course import Course
 from lms.domain.student import Student
 from lms.domain.user import User
 from lms.infra.sql_course import SqlCourse
@@ -52,17 +53,34 @@ class SqlStudent(SqlUser, Student):
             return None
         assert user_info is not None, 'have row in students table but not in users'
         student_info.update(user_info)
-        student_info['role'] = 'student'
+        if 'role' in user_fields:
+            student_info['role'] = 'student'
         return student_info
 
-    async def courses_list(self) -> List[Dict[str, str]]:
-        print('student')
+    async def _classmates(self, group_name: str) -> List['SqlStudent']:
+        query = """SELECT user_id FROM student WHERE group_name = $1 and user_id != $2"""
+        records = await pe.fetch(query=query, params=(group_name, self.user_id))
+        classmates = []
+        for student in records:
+            classmate = SqlStudent(user_id=student.get('user_id'))
+            classmates.append(
+                classmate
+            )
+        return classmates
+
+    async def classmates(self) -> List[Student]:
+        if await self.is_professor:
+            return []
+        info = await self.get_info(properties=('group_name', ))
+        group_name = info.get('group_name')
+        assert group_name
+        return await self._classmates(group_name)
+
+    async def courses(self) -> List[Course]:
         info = await self.get_info(properties=('group_name',))
         group_name = info.get('group_name')
         if group_name is None:
-            print('no group name')
             return []
-        print(group_name)
         query_courses = '''SELECT course_id
             FROM group_to_course 
             WHERE group_name = $1'''
@@ -72,7 +90,5 @@ class SqlStudent(SqlUser, Student):
         )
         if records is None:
             return []
-        courses = await SqlCourse.resolve_courses(
-            course_ids=[record.get('course_id', None) for record in records]
-        )
+        courses = [SqlCourse(course_id=record.get('course_id')) for record in records]
         return courses

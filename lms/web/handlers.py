@@ -12,8 +12,6 @@ from tornado.web import (
     authenticated,
 )
 
-import lms.infra.db.postgres_executor as pe
-
 
 class PingHandler(RequestHandler):
     _response = {
@@ -126,13 +124,13 @@ class RegisterHandler(UserHandler):
 
 
 class AuthUserHandler(UserHandler):
-    @authenticated
     def initialize(self, user_factory):
         super().initialize(user_factory=user_factory)
-        self.user_id = self.get_current_user_id()
-        assert self.user_id
 
     async def prepare(self):
+        self.user_id = self.get_current_user_id()
+        if self.user_id is None:
+            raise tornado.web.HTTPError(403)
         self.user = await self.user_factory.get_student_or_professor(
             user_id=self.user_id
         )
@@ -183,12 +181,42 @@ class UserInfoHandler(UserHandler):
             })
 
 
-class UserCoursesHandler(AuthUserHandler):
-    async def post(self):
-        self.courses = await self.user.courses_list()
+class UserClassmatesHandler(AuthUserHandler):
+    _CLASSMATE_FIELDS = ('user_id', 'name')
+
+    async def prepare(self):
+        await super().prepare()
+        if await self.user.is_professor:
+            self._bad_request(status=405, msg='method classmates is not allowed for professor')
+        self.classmates = await self.user.classmates()
+
+    async def get(self):
+        classmates = []
+        for classmate in self.classmates:
+            classmates.append(
+                await classmate.get_info(properties=self._CLASSMATE_FIELDS)
+            )
         self.write({
             'status': 'ok',
-            'courses': self.courses,
+            'classmates': classmates,
+        })
+
+
+class UserCoursesHandler(AuthUserHandler):
+    _COURSES_FIELDS = ('course_id', 'name')
+
+    async def prepare(self):
+        await super().prepare()
+        self.courses = await self.user.courses()
+
+    async def get(self):
+        courses = [
+            await course.get_info(properties=self._COURSES_FIELDS)
+            for course in self.courses
+        ]
+        self.write({
+            'status': 'ok',
+            'courses': courses,
         })
 
 
@@ -206,22 +234,3 @@ class EditUserInfoHandler(AuthUserHandler):
                 self._bad_request(
                     msg=f'unexpected field {param} does not exist or cannot be updated'
                 )
-
-
-class GroupHandler(RequestHandler):
-    _response = {
-        'status': 'ok',
-        'group': [],
-    }
-
-    async def get(self):
-        res = await pe.fetch(
-            query="SELECT group_name, department, course_no FROM student_group"
-        )
-        groups = []
-        for record in res:
-            groups.append(dict(record))
-        self.write({
-            'groups': groups
-        })
-        self.set_status(200)

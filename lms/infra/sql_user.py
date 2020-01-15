@@ -44,7 +44,7 @@ class SqlUser(User, metaclass=ABCMeta):
             params=(resolved_user_id, email, password)
         )
         assert user_id
-        return True, 'successfully updated'
+        return True, 'successfully registered'
 
     @staticmethod
     async def check_is_professor(*, user_id: int) -> bool:
@@ -60,8 +60,10 @@ class SqlUser(User, metaclass=ABCMeta):
             *,
             properties: Optional[Iterable[str]] = None
     ):
-        if not properties:
+        if properties is None:
             properties = self.properties()
+        if not properties:
+            return {}
         query = """SELECT * FROM users WHERE user_id=$1"""
         user_record = await pe.fetch_row(
             query=query,

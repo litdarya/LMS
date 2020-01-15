@@ -4,8 +4,7 @@ import click
 from tornado import ioloop
 from tornado.web import Application
 
-from lms.settings import COOKIE_SECRET
-from lms.web.urls import get_all_urls
+from lms.web.urls import get_all_urls, get_settings
 
 
 class LmsApplication(Application):
@@ -18,9 +17,10 @@ class LmsApplication(Application):
 @click.option('--port', default=8000)
 def serve(port: int):
     handlers = get_all_urls()
+    settings = get_settings()
     application = LmsApplication(
         handlers,
-        cookie_secret=COOKIE_SECRET,
+        **settings,
     )
     application.listen(port)
     ioloop.IOLoop.current().start()
